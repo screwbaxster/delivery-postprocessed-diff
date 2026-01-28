@@ -14,6 +14,12 @@ def normalize(filename: str) -> str:
         name = name.rsplit(".", 1)[0]
     return name
 
+st.markdown("## Welcome to the Porticus")
+st.markdown(
+    "This space hosts a small collection of practical tools, "
+    "built to support everyday workflows and complement "
+    "the greater Temple of Scripts."
+)
 
 st.title("Delivery vs Postprocessed")
 st.write(
