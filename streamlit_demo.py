@@ -29,7 +29,7 @@ tool = st.sidebar.radio(
     ["Home", 
      "Comparatio (Folder Difference)",
      "Collectio (Excel File Lookup)",
-     "Duplication (Common Files)"
+     "Duplicatio (Common Files)"
     ]
 )
 
