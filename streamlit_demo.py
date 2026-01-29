@@ -54,7 +54,7 @@ if tool == "Home":
         "retrieve files present in one set but not the other.\n"
         "- **Collectio (Excel File Lookup)** — Copy files from a folder "
         "on a list of names provided in an Excel file.\n"
-        "- **Duplication (Common Files)** — Identify filenames that "
+        "- **Duplicatio (Common Files)** — Identify filenames that "
         "appear in both Folder A and Folder B and exports a CSV report."
     )
 
