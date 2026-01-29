@@ -51,11 +51,10 @@ if tool == "Home":
     st.markdown("### Available tools")
     st.markdown(
         "- **Comparatio (Folder Difference)** — Compare two folders and "
-        "retrieve files present in one set but not the other."
-        
-        "- **Collectio (Excel File Lookup)** - Copy files from a folder "
-        "on a list of names provided in an Excel file."
-        "- **Duplication (Common Files)** - Identify filenames that "
+        "retrieve files present in one set but not the other.\n"
+        "- **Collectio (Excel File Lookup)** — Copy files from a folder "
+        "on a list of names provided in an Excel file.\n"
+        "- **Duplication (Common Files)** — Identify filenames that "
         "appear in both Folder A and Folder B and exports a CSV report."
     )
 
