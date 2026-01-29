@@ -1,18 +1,36 @@
-import streamlit as st
-import zipfile
-import io
-
-
 def normalize(filename: str) -> str:
-    """
-    Normalize filename for comparison:
-    - lowercase
-    - strip extension
-    """
     name = filename.lower().strip()
     if "." in name:
         name = name.rsplit(".", 1)[0]
     return name
+
+
+st.sidebar.title("Porticus")
+st.sidebar.markdown("Practical tools")
+
+tool = st.sidebar.radio(
+    "Available scripts",
+    ["Delivery vs Postprocessed"]
+)
+
+
+st.markdown("## Welcome to the Porticus")
+st.markdown(
+    "This space hosts a small collection of practical tools, "
+    "built to support everyday workflows and complement "
+    "the greater Temple of Scripts."
+)
+st.markdown("---")
+
+
+if tool == "Delivery vs Postprocessed":
+    st.title("Delivery vs Postprocessed")
+    st.write(
+        "Upload files from a previous **Delivery** and from **Postprocessed**. "
+        "The app will generate a ZIP with files that were not previously delivered "
+        "(comparison ignores file extensions)."
+    )
+
 
 st.markdown("## Welcome to the Porticus")
 st.markdown(
