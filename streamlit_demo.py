@@ -32,12 +32,7 @@ tool = st.sidebar.radio(
 # =========================
 if tool == "Home":
     st.markdown("## Welcome to the Porticus")
-    st.markdown(
-        "Porticus is a small collection of practical internal tools, "
-        "designed to support everyday workflows and complement "
-        "the great Temple of Scripts."
-    )
-
+   
     st.markdown("---")
 
     st.markdown("### Available tools")
