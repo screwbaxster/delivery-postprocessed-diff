@@ -1,5 +1,7 @@
 import streamlit as st
 import zipfile
+import pandas as pd
+from pathlib import Path
 import io
 
 
@@ -23,7 +25,10 @@ st.sidebar.markdown("Practical tools")
 
 tool = st.sidebar.radio(
     "Available tools",
-    ["Home", "Comparatio (Folder Difference)"]
+    ["Home", 
+     "Comparatio (Folder Difference)",
+     "Collectio (Excel File Lookup)"
+    ]
 )
 
 
@@ -35,7 +40,7 @@ if tool == "Home":
 
     st.markdown(
     "Porticus is a small collection of practical internal tools, "
-    "designed to support everyday workflows and complement "
+    "designed to support users of "
     "the great Temple of Scripts."
 )
     
@@ -45,6 +50,8 @@ if tool == "Home":
     st.markdown(
         "- **Comparatio (Folder Difference)** — Compare two folders and "
         "retrieve files present in one set but not the other."
+        "- **Collectio (Excel File Lookup)** - Copy files from a folder "
+        "on a list of names provided in an Excel file."
     )
 
 
@@ -107,3 +114,73 @@ if tool == "Comparatio (Folder Difference)":
                     file_name="new_files.zip",
                     mime="application/zip"
                 )
+if tool == "Collectio (Excel File Lookup)":
+
+    st.title("Collectio (Excel File Lookup)")
+    st.write(
+        "Upload an Excel file containing filenames (no extensions) and a folder of files. "
+        "The app will find matching files and return them as a ZIP."
+    )
+
+    excel_file = st.file_uploader(
+        "Excel file with filenames (first column, no extension)",
+        type=["xlsx", "xls"]
+    )
+
+    search_files = st.file_uploader(
+        "Folder files to search",
+        accept_multiple_files=True
+    )
+
+    if st.button("Find and collect files"):
+
+        if not excel_file or not search_files:
+            st.error("Please upload both the Excel file and the folder files.")
+        else:
+            df = pd.read_excel(excel_file, header=None)
+            base_names = (
+                df[0]
+                .dropna()
+                .astype(str)
+                .str.strip()
+                .str.lower()
+                .tolist()
+            )
+
+            if not base_names:
+                st.error("No filenames found in the Excel file.")
+            else:
+                # Index uploaded files by stem
+                file_index = {}
+                for f in search_files:
+                    stem = f.name.rsplit(".", 1)[0].lower()
+                    file_index.setdefault(stem, []).append(f)
+
+                found_files = []
+                missing = []
+
+                for base in base_names:
+                    if base in file_index:
+                        found_files.extend(file_index[base])
+                    else:
+                        missing.append(base)
+
+                if not found_files:
+                    st.info("No matching files found.")
+                else:
+                    st.success(f"Files found: {len(found_files)}")
+                    st.write(f"Names not found: {len(missing)}")
+
+                    zip_buffer = io.BytesIO()
+                    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                        for f in found_files:
+                            zf.writestr(f.name, f.read())
+
+                    zip_buffer.seek(0)
+
+                    st.download_button(
+                        label="Download ZIP with found files",
+                        data=zip_buffer,
+                        file_name="collected_files.zip",
+                        mime="application/zip"
+                    )
