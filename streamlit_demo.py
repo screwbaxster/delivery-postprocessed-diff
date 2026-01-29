@@ -60,7 +60,7 @@ if tool == "Home":
 
 st.caption(
         "Disclaimer: Uploaded files are processed in-memory only and are not stored "
-        "or logged."
+        "or logged. "
         "The Porticus is an internal utility."
     )
 
