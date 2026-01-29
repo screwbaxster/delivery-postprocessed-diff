@@ -38,7 +38,7 @@ tool = st.sidebar.radio(
 # Main content
 # =========================
 if tool == "Home":
-    st.markdown("## Welcome to the Porticus")
+    st.markdown("## Welcome to The Porticus")
 
     st.markdown(
     "Porticus is a small collection of practical internal tools, "
@@ -61,7 +61,7 @@ if tool == "Home":
 st.caption(
         "Uploaded files are processed in-memory only and are not stored "
         "or logged.\"
-)
+    )
 
 if tool == "Comparatio (Folder Difference)":
 
