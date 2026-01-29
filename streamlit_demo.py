@@ -3,6 +3,7 @@ import zipfile
 import pandas as pd
 from pathlib import Path
 import io
+import csv
 
 
 def normalize(filename: str) -> str:
@@ -52,6 +53,8 @@ if tool == "Home":
         "retrieve files present in one set but not the other."
         "- **Collectio (Excel File Lookup)** - Copy files from a folder "
         "on a list of names provided in an Excel file."
+        "- **Duplication (Common Files)** - Identify filenames that "
+        "appear in both Folder A and Folder B and exports a CSV report."
     )
 
 
@@ -184,3 +187,51 @@ if tool == "Collectio (Excel File Lookup)":
                         file_name="collected_files.zip",
                         mime="application/zip"
                     )
+
+if tool == "Duplicatio (Common Files)":
+
+    st.title("Duplicatio (Common Files)")
+    st.write(
+        "Upload files from **Folder A** and **Folder B**. "
+        "The app will identify filenames that exist in both folders "
+        "and generate a CSV report."
+    )
+
+    folder_a_files = st.file_uploader(
+        "Folder A",
+        accept_multiple_files=True
+    )
+
+    folder_b_files = st.file_uploader(
+        "Folder B",
+        accept_multiple_files=True
+    )
+
+    if st.button("Find duplicate filenames"):
+
+        if not folder_a_files or not folder_b_files:
+            st.error("Please upload files for both Folder A and Folder B.")
+        else:
+            names_a = {f.name for f in folder_a_files}
+            names_b = {f.name for f in folder_b_files}
+
+            duplicates = sorted(names_a & names_b)
+
+            if not duplicates:
+                st.info("No duplicate filenames found.")
+            else:
+                st.success(f"{len(duplicates)} duplicate filename(s) found.")
+
+                csv_buffer = io.StringIO()
+                writer = csv.writer(csv_buffer)
+                writer.writerow(["filename", "found_in"])
+
+                for name in duplicates:
+                    writer.writerow([name, "both_folders"])
+
+                st.download_button(
+                    label="Download CSV report",
+                    data=csv_buffer.getvalue(),
+                    file_name="duplicate_filenames.csv",
+                    mime="text/csv"
+                )
