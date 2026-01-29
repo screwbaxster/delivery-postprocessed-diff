@@ -59,8 +59,9 @@ if tool == "Home":
     )
 
 st.caption(
-        "Uploaded files are processed in-memory only and are not stored "
-        "or logged.\"
+        "Disclaimer: Uploaded files are processed in-memory only and are not stored "
+        "or logged."
+        "The Porticus is an internal utility."
     )
 
 if tool == "Comparatio (Folder Difference)":
