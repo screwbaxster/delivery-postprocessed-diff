@@ -52,6 +52,7 @@ if tool == "Home":
     st.markdown(
         "- **Comparatio (Folder Difference)** — Compare two folders and "
         "retrieve files present in one set but not the other."
+        
         "- **Collectio (Excel File Lookup)** - Copy files from a folder "
         "on a list of names provided in an Excel file."
         "- **Duplication (Common Files)** - Identify filenames that "
