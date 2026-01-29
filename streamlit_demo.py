@@ -22,15 +22,15 @@ st.sidebar.title("Porticus")
 st.sidebar.markdown("Practical tools")
 
 tool = st.sidebar.radio(
-    "Available scripts",
-    ["Delivery vs Postprocessed"]
+    "Available tools",
+    ["Comparatio (Folder Difference)"]
 )
 
 
 # =========================
 # Main content
 # =========================
-if tool == "Delivery vs Postprocessed":
+if tool == "Comparatio (Folder Difference)":
 
     st.markdown("## Welcome to the Porticus")
     st.markdown(
@@ -40,34 +40,34 @@ if tool == "Delivery vs Postprocessed":
     )
     st.markdown("---")
 
-    st.title("Delivery vs Postprocessed")
+    st.title("Comparatio (Folder Difference)")
     st.write(
-        "Upload files from a previous **Delivery** and from **Postprocessed**. "
-        "The app will generate a ZIP with files that were not previously delivered "
-        "(comparison ignores file extensions)."
+        "Upload files from **Folder A** and **Folder B**. "
+        "The app will generate a ZIP containing files present in Folder B "
+        "but not in Folder A (comparison ignores file extensions)."
     )
 
-    delivery_files = st.file_uploader(
-        "Delivery files (already sent)",
+    folder_a_files = st.file_uploader(
+        "Folder A",
         accept_multiple_files=True
     )
 
-    postprocessed_files = st.file_uploader(
-        "Postprocessed files (completed)",
+    folder_b_files = st.file_uploader(
+        "Folder B",
         accept_multiple_files=True
     )
 
     if st.button("Compare"):
 
-        if not delivery_files or not postprocessed_files:
+        if not folder_a_files or not folder_b_files:
             st.error("Please upload files in both sections.")
         else:
             delivery_names = {
-                normalize(f.name) for f in delivery_files
+                normalize(f.name) for f in folder_a_files
             }
 
             new_files = [
-                f for f in postprocessed_files
+                f for f in folder_b_files
                 if normalize(f.name) not in delivery_names
             ]
 
