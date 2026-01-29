@@ -28,7 +28,8 @@ tool = st.sidebar.radio(
     "Available tools",
     ["Home", 
      "Comparatio (Folder Difference)",
-     "Collectio (Excel File Lookup)"
+     "Collectio (Excel File Lookup)",
+     "Duplication (Common Files)"
     ]
 )
 
