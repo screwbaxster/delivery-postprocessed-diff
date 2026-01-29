@@ -23,13 +23,35 @@ st.sidebar.markdown("Practical tools")
 
 tool = st.sidebar.radio(
     "Available tools",
-    ["Comparatio (Folder Difference)"]
+    ["Home", "Comparatio (Folder Difference)"]
 )
 
 
 # =========================
 # Main content
 # =========================
+if tool == "Home":
+    st.markdown("## Welcome to the Porticus")
+    st.markdown(
+        "Porticus is a small collection of practical internal tools, "
+        "designed to support everyday workflows and complement "
+        "the great Temple of Scripts."
+    )
+
+    st.markdown("---")
+
+    st.markdown("### Available tools")
+    st.markdown(
+        "- **Comparatio (Folder Difference)** — Compare two folders and "
+        "retrieve files present in one set but not the other."
+    )
+
+    st.caption(
+        "Porticus focuses on pragmatic, lightweight utilities. "
+        "Tools may later be promoted to the Temple of Scripts."
+    )
+
+
 if tool == "Comparatio (Folder Difference)":
 
     st.markdown("## Welcome to the Porticus")
