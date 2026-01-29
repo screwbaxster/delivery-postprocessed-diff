@@ -58,6 +58,10 @@ if tool == "Home":
         "appear in both Folder A and Folder B and exports a CSV report."
     )
 
+st.caption(
+        "Uploaded files are processed in-memory only and are not stored "
+        "or logged.\"
+)
 
 if tool == "Comparatio (Folder Difference)":
 
