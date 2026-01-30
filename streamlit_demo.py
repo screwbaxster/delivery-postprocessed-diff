@@ -267,45 +267,46 @@ if tool == "Classificatio (URL Domain)":
 
     uploaded_file = st.file_uploader("Excel file", type=["xlsx", "xls"])
 
-if uploaded_file:
-    df = read_excel_safe(uploaded_file)
+    if uploaded_file:
+        df = read_excel_safe(uploaded_file)
 
-    if df.shape[1] < 4:
-        st.error("Excel must have at least columns A, C, and D.")
-    else:
-        col_a = df.columns[0]
-        col_c = df.columns[2]
-        col_d = df.columns[3]
+        if df.shape[1] < 4:
+            st.error("Excel must have at least columns A, C, and D.")
+        else:
+            col_a = df.columns[0]
+            col_c = df.columns[2]
+            col_d = df.columns[3]
 
-sectors = []
+            sectors = []
 
-with st.spinner("Fetching webpages and classifying URLs..."):
-    for _, row in df.iterrows():
-        local_text = (
-            str(row[col_a]) + " " + str(row[col_c])
-        )
+            with st.spinner("Fetching webpages and classifying URLs..."):
+                for _, row in df.iterrows():
+                    local_text = (
+                        str(row[col_a]) + " " + str(row[col_c])
+                    )
 
-        url_text = fetch_page_text(str(row[col_d]))
+                    url_text = fetch_page_text(str(row[col_d]))
 
-        combined_text = local_text + " " + url_text
+                    combined_text = local_text + " " + url_text
 
-        sectors.append(detect_sector(combined_text))
+                    sectors.append(detect_sector(combined_text))
 
-df["Sector"] = sectors
+            df["Sector"] = sectors
 
-st.success("Sector classification complete.")
-st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+            st.success("Sector classification complete.")
+            st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
 
-output = "urls_classified_by_sector.xlsx"
-df.to_excel(output, index=False)
+            output = "urls_classified_by_sector.xlsx"
+            df.to_excel(output, index=False)
 
-with open(output, "rb") as f:
-    st.download_button(
-        "Download Excel",
-        f,
-        output,
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+            with open(output, "rb") as f:
+                st.download_button(
+                    "Download Excel",
+                    f,
+                    output,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+
 
 
 # =========================
