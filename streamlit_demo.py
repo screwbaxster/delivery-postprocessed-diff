@@ -7,6 +7,66 @@ import requests
 from bs4 import BeautifulSoup
 import re
 
+st.markdown(
+    """
+    <style>
+    /* App background */
+    .stApp {
+        background-color: #D7F9F1;
+        color: #40531B;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #A9CDC3;
+    }
+
+    /* Main content cards */
+    div[data-testid="stVerticalBlock"] > div {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 10px;
+        border: 1px solid #7AA095;
+        box-shadow: 0 2px 8px rgba(64, 83, 27, 0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5, h6 {
+        color: #40531B;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        background-color: #618B4A;
+        color: white;
+        border-radius: 6px;
+        border: none;
+        padding: 0.5rem 1rem;
+    }
+
+    .stButton > button:hover {
+        background-color: #40531B;
+        color: white;
+    }
+
+    /* File uploader */
+    div[data-testid="stFileUploader"] {
+        border: 1px dashed #7AA095;
+        background-color: #F5FBF9;
+        border-radius: 6px;
+    }
+
+    /* Success messages */
+    div[data-testid="stAlert"][role="alert"] {
+        background-color: #AFBC88;
+        color: #40531B;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # =========================
 # Domain keyword mapping
 # =========================
