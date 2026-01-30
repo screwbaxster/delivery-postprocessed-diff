@@ -10,62 +10,94 @@ import re
 st.markdown(
     """
     <style>
-    /* App background */
+    /* =====================
+       Global background
+       ===================== */
     .stApp {
-        background-color: #D7F9F1;
-        color: #40531B;
+        background-color: #102E50;
+        color: #F5C45E;
     }
 
-    /* Sidebar */
+    /* =====================
+       Sidebar (secondary area)
+       ===================== */
     section[data-testid="stSidebar"] {
-        background-color: #A9CDC3;
+        background-color: #F5C45E;
     }
 
-    /* Main content cards */
+    section[data-testid="stSidebar"] * {
+        color: #102E50;
+    }
+
+    /* =====================
+       Main content cards
+       ===================== */
     div[data-testid="stVerticalBlock"] > div {
-        background-color: #ffffff;
+        background-color: #F5C45E;
         padding: 2rem;
         border-radius: 10px;
-        border: 1px solid #7AA095;
-        box-shadow: 0 2px 8px rgba(64, 83, 27, 0.08);
+        border: 1px solid #E78B48;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
         margin-bottom: 1.5rem;
+        color: #102E50;
     }
 
-    /* Headings */
+    /* =====================
+       Headings (smallest, high emphasis)
+       ===================== */
     h1, h2, h3, h4, h5, h6 {
-        color: #40531B;
+        color: #BE3D2A;
     }
 
-    /* Buttons */
+    /* =====================
+       Buttons (interactive)
+       ===================== */
     .stButton > button {
-        background-color: #618B4A;
-        color: white;
+        background-color: #E78B48;
+        color: #102E50;
         border-radius: 6px;
         border: none;
         padding: 0.5rem 1rem;
+        font-weight: 600;
     }
 
     .stButton > button:hover {
-        background-color: #40531B;
-        color: white;
+        background-color: #BE3D2A;
+        color: #F5C45E;
     }
 
-    /* File uploader */
+    /* =====================
+       File uploader
+       ===================== */
     div[data-testid="stFileUploader"] {
-        border: 1px dashed #7AA095;
-        background-color: #F5FBF9;
+        background-color: #F5C45E;
+        border: 2px dashed #E78B48;
         border-radius: 6px;
+        color: #102E50;
     }
 
-    /* Success messages */
-    div[data-testid="stAlert"][role="alert"] {
-        background-color: #AFBC88;
-        color: #40531B;
+    /* =====================
+       Alerts / success boxes
+       ===================== */
+    div[data-testid="stAlert"] {
+        background-color: #E78B48;
+        color: #102E50;
+        border-left: 6px solid #BE3D2A;
+    }
+
+    /* =====================
+       Tables / DataFrames
+       ===================== */
+    div[data-testid="stDataFrame"] {
+        background-color: #F5C45E;
+        color: #102E50;
+        border-radius: 6px;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # =========================
 # Domain keyword mapping
