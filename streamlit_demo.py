@@ -3,6 +3,9 @@ import zipfile
 import pandas as pd
 import io
 import csv
+import requests
+from bs4 import BeautifulSoup
+import re
 
 # =========================
 # Domain keyword mapping
@@ -47,6 +50,47 @@ def normalize(filename: str) -> str:
         name = name.rsplit(".", 1)[0]
     return name
 
+def normalize_text(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+@st.cache_data(ttl=3600)
+def fetch_page_text(url: str) -> str:
+    try:
+            headers = {"User-Agent": "Mozilla/5.0"}
+            r = requests.get(url, headers=headers, timeout=5)
+
+            if r.status_code !=200:
+                    return ""
+
+            soup = BeautifulSoup(r.text, "html.parser")
+
+            for tag in soup(["script", "style", "noscript"]):
+                tag.decompose()
+
+            return normalize_text(
+                    soup.get_text(separator=" ", strip=True)
+            )
+
+        except Exception:
+            return ""
+
+def detect_sector(text: str) -> str:
+        text = normalize_text(text)
+
+        scores = {
+            sector: sum(1 for kw in keywords if kw in text)
+            for sector, keywords in DOMAIN_KEYWORDS.items()
+        }
+
+        best_sector = max(scores, key=scores.get)
+
+        if scores[best_sector] == 0:
+            return "Unclassified"
+
+        return best_sector
+    
 def detect_sector(text: str) -> str:
     text = text.lower()
     for sector, keywords in DOMAIN_KEYWORDS.items():
@@ -233,32 +277,42 @@ if tool == "Classificatio (URL Domain)":
             col_c = df.columns[2]
             col_d = df.columns[3]
 
-            combined = (
-                df[col_a].fillna("").astype(str)
-                + " "
-                + df[col_c].fillna("").astype(str)
-            )
+sectors = []
 
-            df["Sector"] = combined.apply(detect_sector)
+with st.spinner("Fetching webpages and classifying URLs..."):
+    for _, row in df.iterrows():
+        local_text = (
+            str(row[col_a]) + " " + str(row[col_c])
+        )
 
-            st.success("Sector classification complete.")
-            st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+        url_text = fetch_page_text(str(row[col_d]))
 
-            output = "urls_classified_by_sector.xlsx"
-            df.to_excel(output, index=False)
+        combined_text = local_text + " " + url_text
 
-            with open(output, "rb") as f:
-                st.download_button(
-                    "Download Excel",
-                    f,
-                    output,
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+        sectors.append(detect_sector(combined_text))
+
+df["Sector"] = sectors
+
+st.success("Sector classification complete.")
+st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+
+output = "urls_classified_by_sector.xlsx"
+df.to_excel(output, index=False)
+
+with open(output, "rb") as f:
+    st.download_button(
+        "Download Excel",
+        f,
+        output,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 
 # =========================
 # Footer
 # =========================
 st.caption(
     "Disclaimer: Files are processed in-memory only. "
+    "No data is stored, saved, or kept on this page. "
     "Porticus is an internal utility."
 )
