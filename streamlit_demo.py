@@ -73,7 +73,7 @@ def fetch_page_text(url: str) -> str:
                     soup.get_text(separator=" ", strip=True)
             )
 
-        except Exception:
+            except Exception:
             return ""
 
 def detect_sector(text: str) -> str:
