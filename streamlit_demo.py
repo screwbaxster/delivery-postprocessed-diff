@@ -55,6 +55,16 @@ def detect_sector(text: str) -> str:
                 return sector
     return "Unclassified"
 
+def read_excel_safe(uploaded_file):
+    try:
+        return pd.read_excel(uploaded_file)
+    except ImportError:
+        st.error("Missing dependency: openpyxl. Please install it to read Excel files.")
+        st.stop()
+    except Exception as e:
+        st.error(f"Error reading Excel file: {e}")
+        st.stop()
+
 # =========================
 # Sidebar
 # =========================
@@ -137,8 +147,8 @@ if tool == "Collectio (Excel File Lookup)":
         if not excel_file or not search_files:
             st.error("Upload both Excel and files.")
         else:
-            df = pd.read_excel(excel_file, header=None)
-            targets = df[0].dropna().astype(str).str.lower().str.strip().tolist()
+            df = read_excel_safe(excel_file)
+            targets = df.iloc[:, 0].dropna().astype(str).str.lower().str.strip().tolist()
 
             index = {}
             for f in search_files:
@@ -211,10 +221,10 @@ if tool == "Classificatio (URL Domain)":
         "to assign a sector to the URL in Column D."
     )
 
-    uploaded_file = st.file_uploader("Excel file", type=["xlsx"])
+    uploaded_file = st.file_uploader("Excel file", type=["xlsx", "xls"])
 
     if uploaded_file:
-        df = pd.read_excel(uploaded_file)
+        df = read_excel_safe(uploaded_file)
 
         if df.shape[1] < 4:
             st.error("Excel must have at least columns A, C, and D.")
