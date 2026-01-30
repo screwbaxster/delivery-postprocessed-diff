@@ -163,8 +163,7 @@ if tool == "Home":
     card("""
     <h3>Design Philosophy</h3>
     <p>
-    This interface favors clarity, restraint, and deterministic behavior.
-    No AI inference. No guesswork. Just tools that do what they say.
+    What exists because it must, not because it is popular.
     </p>
     """)
 
