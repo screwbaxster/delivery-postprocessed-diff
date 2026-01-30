@@ -58,23 +58,23 @@ def normalize_text(text: str) -> str:
 @st.cache_data(ttl=3600)
 def fetch_page_text(url: str) -> str:
     try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            r = requests.get(url, headers=headers, timeout=5)
+        headers = {"User-Agent": "Mozilla/5.0"}
+        r = requests.get(url, headers=headers, timeout=5)
 
-            if r.status_code !=200:
-                    return ""
-
-            soup = BeautifulSoup(r.text, "html.parser")
-
-            for tag in soup(["script", "style", "noscript"]):
-                tag.decompose()
-
-            return normalize_text(
-                    soup.get_text(separator=" ", strip=True)
-            )
-
-            except Exception:
+        if r.status_code !=200:
             return ""
+
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        for tag in soup(["script", "style", "noscript"]):
+            tag.decompose()
+
+        return normalize_text(
+                    soup.get_text(separator=" ", strip=True)
+        )
+
+    except Exception:
+        return ""
 
 def detect_sector(text: str) -> str:
         text = normalize_text(text)
