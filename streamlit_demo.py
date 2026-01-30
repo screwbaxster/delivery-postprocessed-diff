@@ -32,7 +32,7 @@ st.markdown(
     /* =====================
        Main content cards
        ===================== */
-    div[data-testid="stVerticalBlock"] > div {
+    div[data-testid="stVerticalBlock"] > div:has(*):not(:empty) {
         background-color: #F5C45E;
         padding: 2rem;
         border-radius: 10px;
