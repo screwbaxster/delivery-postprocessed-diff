@@ -519,7 +519,7 @@ if tool == "Gratia (Inspire me)":
     if "gratia_index" not in st.session_state:
         st.session_state.gratia_index = 0
 
-    if st.button("Tell me something nice"):
+    if st.button("Tell me something to reflect on"):
         quote = INSPIRING_QUOTES[st.session_state.gratia_index]
         st.session_state.gratia_index = (
             st.session_state.gratia_index + 1
