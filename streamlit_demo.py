@@ -36,61 +36,234 @@ LANGUAGE_TO_FAMILY = {
 # Keyword sets by family
 # =========================
 KEYWORDS_BY_FAMILY = {
+
+    # =========================
+    # GERMANIC
+    # =========================
     "germanic": {
-        "Education": ["school", "university", "student", "education", "course"],
-        "Finance": ["bank", "loan", "payment", "insurance", "account"],
-        "Medical": ["health", "doctor", "hospital", "patient"],
-        "Retail": ["store", "shop", "order", "purchase"],
-        "Tax": ["tax", "vat", "income", "fiscal"],
-        "Travel": ["travel", "flight", "hotel", "booking"],
-        "Vehicle": ["vehicle", "car", "registration", "license"],
+        "Education": [
+            "school", "schools", "education", "educational", "student", "students",
+            "teacher", "teachers", "university", "college", "campus", "degree",
+            "course", "courses", "curriculum", "enrollment", "admissions",
+            "training", "academy", "learning", "learning platform", "lms"
+        ],
+        "Finance": [
+            "bank", "banking", "financial", "finance", "loan", "credit", "debit",
+            "account", "accounts", "payment", "payments", "billing", "invoice",
+            "transaction", "transfer", "interest", "mortgage", "insurance",
+            "policy", "premium", "portfolio", "investment", "fund", "capital"
+        ],
+        "Medical": [
+            "health", "healthcare", "medical", "medicine", "doctor", "physician",
+            "hospital", "clinic", "patient", "patients", "appointment",
+            "treatment", "therapy", "prescription", "pharmacy", "diagnosis",
+            "care", "wellness", "mental health"
+        ],
+        "Retail": [
+            "store", "shop", "retail", "product", "products", "catalog",
+            "order", "orders", "purchase", "checkout", "cart", "customer",
+            "pricing", "price", "sale", "discount", "promotion", "shipping",
+            "delivery", "returns", "refund"
+        ],
+        "Tax": [
+            "tax", "taxes", "taxation", "income tax", "sales tax", "vat",
+            "fiscal", "tax return", "filing", "deduction", "withholding",
+            "tax authority", "revenue service", "audit", "compliance"
+        ],
+        "Travel": [
+            "travel", "trip", "tourism", "flight", "airline", "airport",
+            "hotel", "accommodation", "booking", "reservation", "destination",
+            "itinerary", "vacation", "holiday", "ticket", "boarding pass"
+        ],
+        "Vehicle": [
+            "vehicle", "vehicles", "car", "auto", "automobile", "truck",
+            "motorcycle", "engine", "registration", "license", "inspection",
+            "insurance", "maintenance", "service", "repair", "dealer"
+        ],
     },
+
+    # =========================
+    # ROMANCE
+    # =========================
     "romance": {
-        "Education": ["escuela", "université", "università", "educación", "étudiant"],
-        "Finance": ["banco", "banque", "pagamento", "assurance"],
-        "Medical": ["salud", "médecin", "ospedale"],
-        "Retail": ["tienda", "magasin", "ordine"],
-        "Tax": ["impuesto", "taxe", "imposta", "iva"],
-        "Travel": ["viaje", "vol", "hotel", "réservation"],
-        "Vehicle": ["vehículo", "voiture", "auto"],
+        "Education": [
+            "escuela", "école", "scuola", "educación", "éducation", "istruzione",
+            "estudiante", "étudiant", "studente", "universidad", "université",
+            "università", "curso", "cours", "corso", "formación", "formation",
+            "apprentissage", "enseñanza", "insegnamento"
+        ],
+        "Finance": [
+            "banco", "banque", "banca", "finanzas", "finance", "credito", "crédit",
+            "cuenta", "compte", "conto", "pago", "paiement", "pagamento",
+            "factura", "facturation", "assurance", "seguro", "investissement",
+            "investimento", "fonds", "capital"
+        ],
+        "Medical": [
+            "salud", "santé", "salute", "medicina", "médical", "médico",
+            "doctor", "médecin", "ospedale", "hospital", "clínica", "clinique",
+            "paciente", "patient", "traitement", "traitement", "prescripción",
+            "farmacia"
+        ],
+        "Retail": [
+            "tienda", "magasin", "negozio", "venta", "vente", "vendita",
+            "producto", "produit", "prodotto", "pedido", "commande", "ordine",
+            "cliente", "client", "prezzo", "prix", "promoción", "réduction"
+        ],
+        "Tax": [
+            "impuesto", "impuestos", "taxe", "impôt", "imposta",
+            "fiscal", "fiscale", "iva", "tva", "déclaration",
+            "retenue", "retención", "autorité fiscale"
+        ],
+        "Travel": [
+            "viaje", "voyage", "viaggio", "vuelo", "vol", "volo",
+            "hotel", "hébergement", "prenotazione", "réservation",
+            "destino", "destination", "vacances", "vacaciones"
+        ],
+        "Vehicle": [
+            "vehículo", "véhicule", "veicolo", "auto", "voiture",
+            "immatriculation", "registrazione", "assicurazione",
+            "réparation", "entretien", "concessionnaire"
+        ],
     },
+
+    # =========================
+    # SLAVIC
+    # =========================
     "slavic": {
-        "Education": ["школа", "университет", "учеба"],
-        "Finance": ["банк", "кредит", "платеж"],
-        "Medical": ["здоровье", "врач", "больница"],
-        "Retail": ["магазин", "покупка"],
-        "Tax": ["налог", "фискальный"],
-        "Travel": ["путешествие", "отель"],
-        "Vehicle": ["автомобиль", "регистрация"],
+        "Education": [
+            "школа", "университет", "образование", "учеба", "студент",
+            "student", "kurs", "edukacja", "nauka", "uczelnia"
+        ],
+        "Finance": [
+            "банк", "kredyt", "кредит", "płatność", "платеж",
+            "konto", "счет", "ubezpieczenie", "страхование"
+        ],
+        "Medical": [
+            "здоровье", "zdrowie", "zdraví", "врач", "lekarz",
+            "больница", "szpital", "лечение", "terapia"
+        ],
+        "Retail": [
+            "магазин", "sklep", "zakup", "покупка", "заказ",
+            "zamówienie", "klient", "cena"
+        ],
+        "Tax": [
+            "налог", "podatek", "daň", "фискальный",
+            "rozliczenie", "deklaracja"
+        ],
+        "Travel": [
+            "путешествие", "podróż", "cestování", "hotel",
+            "lot", "рейс"
+        ],
+        "Vehicle": [
+            "автомобиль", "samochód", "vozidlo", "rejestracja",
+            "страховка", "ubezpieczenie"
+        ],
     },
+
+    # =========================
+    # BALTIC
+    # =========================
     "baltic": {
-        "Education": ["mokykla", "haridus"],
-        "Finance": ["bankas", "konto"],
-        "Medical": ["sveikata", "gydytojas"],
-        "Retail": ["parduotuvė"],
-        "Tax": ["mokestis"],
-        "Travel": ["kelionė"],
-        "Vehicle": ["automobilis"],
+        "Education": [
+            "mokykla", "haridus", "õpe", "õpilane", "studentas",
+            "universitetas", "ülikool"
+        ],
+        "Finance": [
+            "bankas", "pank", "konto", "makse", "laen",
+            "kindlustus", "toetus"
+        ],
+        "Medical": [
+            "sveikata", "tervis", "gydytojas", "arst",
+            "haigla", "ligoninė"
+        ],
+        "Retail": [
+            "parduotuvė", "pood", "klientas", "klient",
+            "kaina", "hind"
+        ],
+        "Tax": [
+            "mokestis", "mokesčiai", "maks", "maksustamine"
+        ],
+        "Travel": [
+            "kelionė", "reis", "viešbutis", "majutus"
+        ],
+        "Vehicle": [
+            "automobilis", "auto", "registreerimine", "registracija"
+        ],
     },
+
+    # =========================
+    # CELTIC
+    # =========================
     "celtic": {
-        "Education": ["scoil", "oideachas"],
-        "Finance": ["banc", "íocaíocht"],
-        "Medical": ["sláinte", "dochtúir"],
-        "Retail": ["siopa"],
-        "Tax": ["cáin"],
-        "Travel": ["taisteal"],
-        "Vehicle": ["feithicil"],
+        "Education": [
+            "scoil", "oideachas", "foghlaim", "mac léinn"
+        ],
+        "Finance": [
+            "banc", "íocaíocht", "airgead", "iasacht"
+        ],
+        "Medical": [
+            "sláinte", "dochtúir", "othar"
+        ],
+        "Retail": [
+            "siopa", "custaiméir", "praghas"
+        ],
+        "Tax": [
+            "cáin", "ioncam"
+        ],
+        "Travel": [
+            "taisteal", "óstán"
+        ],
+        "Vehicle": [
+            "feithicil", "carr"
+        ],
     },
+
+    # =========================
+    # URALIC
+    # =========================
     "uralic": {
-        "Education": ["koulu", "haridus", "iskola"],
-        "Finance": ["pankki", "pank", "bank"],
-        "Medical": ["terveys", "tervis", "egészség"],
-        "Retail": ["kauppa", "pood", "bolt"],
-        "Tax": ["vero", "maks", "adó"],
-        "Travel": ["matka", "reis", "utazás"],
-        "Vehicle": ["ajoneuvo", "sõiduk", "jármű"],
+        "Education": [
+            "koulu", "koulutus", "oppilaitos", "opiskelija",
+            "yliopisto", "ammattikorkeakoulu", "opinto",
+            "haridus", "õpilane", "ülikool",
+            "iskola", "oktatás", "tanuló", "egyetem"
+        ],
+        "Finance": [
+            "pankki", "pank", "bank", "tili", "konto", "számla",
+            "laina", "laen", "hitel", "maksu", "makse", "fizetés",
+            "rahoitus", "kindlustus", "biztosítás",
+            "etuus", "toetus", "támogatás", "kela"
+        ],
+        "Medical": [
+            "terveys", "tervis", "egészség",
+            "lääkäri", "arst", "orvos",
+            "sairaala", "haigla", "kórház",
+            "potilas", "patsient", "beteg"
+        ],
+        "Retail": [
+            "kauppa", "pood", "bolt",
+            "ostos", "ost", "vásárlás",
+            "asiakas", "klient", "ügyfél"
+        ],
+        "Tax": [
+            "vero", "verotus", "verohallinto",
+            "maks", "maksustamine",
+            "adó", "adózás", "adóhatóság"
+        ],
+        "Travel": [
+            "matka", "reis", "utazás",
+            "lento", "lend", "repülés",
+            "oleskelulupa", "viisumi", "vízum"
+        ],
+        "Vehicle": [
+            "ajoneuvo", "sõiduk", "jármű",
+            "auto", "autó",
+            "rekisteröinti", "registreerimine",
+            "vakuutus", "biztosítás"
+        ],
     },
 }
+
 
 # =========================
 # Utility functions
