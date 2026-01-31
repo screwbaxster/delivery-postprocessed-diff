@@ -379,7 +379,7 @@ tool = st.sidebar.radio(
         "Comparatio (Folder Difference)",
         "Collectio (Excel File Lookup)",
         "Duplicatio (Common Files)",
-        "Classificatio (Multilingual URL Domain)"
+        "Classificatio (Multilingual URL Domain)",
         "Gratia (Inspire me)"
     ]
 )
