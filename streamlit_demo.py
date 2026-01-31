@@ -287,7 +287,7 @@ def detect_sector(text: str, keywords: dict) -> str:
     text = normalize(text)
     scores = {s: sum(1 for kw in kws if kw in text) for s, kws in keywords.items()}
     best = max(scores, key=scores.get)
-    return best if scores[best] > 0 else "Unclassified"
+    return best if scores[best] > 0 else "Out of domain scope"
 
 @st.cache_data(ttl=3600)
 def fetch_domain_text(url: str) -> str:
