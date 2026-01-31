@@ -422,12 +422,20 @@ if tool == "Classificatio (Multilingual URL Domain)":
 
         keywords = KEYWORDS_BY_FAMILY[family]
 
+        total_rows = len(df)
+        progress_bar = st.progress(0.0)
+        status_text = st.empty()
+
         sectors = []
-        for _, row in df.iterrows():
+
+        for i, (_, row) in enumerate(df.iterrows(), start=1):
             text = f"{row[col_a]} {row[col_c]}"
             if use_web:
                 text += " " + fetch_domain_text(str(row[col_d]))
             sectors.append(detect_sector(text, keywords))
+            
+            progress_bar.progress(i / total_rows)
+            status_text.write(f"Processing {i} of {total_rows}")
 
         df["Sector"] = sectors
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
