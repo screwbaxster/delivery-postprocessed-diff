@@ -11,6 +11,71 @@ from langdetect import detect, DetectorFactory
 
 DetectorFactory.seed = 0
 
+INSPIRING_QUOTES = [
+
+    # Marcus Aurelius — The Stoic Mind
+    "The happiness of your life depends upon the quality of your thoughts. — Marcus Aurelius",
+    "Waste no more time arguing about what a good man should be. Be one. — Marcus Aurelius",
+    "The best revenge is to be unlike him who performed the injury. — Marcus Aurelius",
+    "Everything we hear is an opinion, not a fact. Everything we see is a perspective, not the truth. — Marcus Aurelius",
+    "If it is not right, do not do it; if it is not true, do not say it. — Marcus Aurelius",
+    "Very little is needed to make a happy life; it is all within yourself, in your way of thinking. — Marcus Aurelius",
+    "The soul becomes dyed with the color of its thoughts. — Marcus Aurelius",
+    "When you arise in the morning, think of what a precious privilege it is to be alive. — Marcus Aurelius",
+    "Loss is nothing else but change, and change is Nature’s delight. — Marcus Aurelius",
+    "Accept the things to which fate binds you, and love the people with whom fate brings you together. — Marcus Aurelius",
+    "He who lives in harmony with himself lives in harmony with the universe. — Marcus Aurelius",
+    "The impediment to action advances action. What stands in the way becomes the way. — Marcus Aurelius",
+    "Our life is what our thoughts make it. — Marcus Aurelius",
+    "It is not death that a man should fear, but he should fear never beginning to live. — Marcus Aurelius",
+    "Because a thing seems difficult for you, do not think it impossible for anyone to accomplish. — Marcus Aurelius",
+    "Receive without conceit, release without struggle. — Marcus Aurelius",
+    "Nowhere can man find a quieter or more untroubled retreat than in his own soul. — Marcus Aurelius",
+    "Think of yourself as dead. You have lived your life. Now, take what’s left and live it properly. — Marcus Aurelius",
+    "Do every act of your life as though it were the very last act of your life. — Marcus Aurelius",
+    "Time is a sort of river of passing events, and strong is its current. — Marcus Aurelius",
+    "Limit yourself to the present. — Marcus Aurelius",
+
+    # Seneca — Resilience
+    "Luck is what happens when preparation meets opportunity. — Seneca",
+    "We suffer more often in imagination than in reality. — Seneca",
+    "Difficulties strengthen the mind, as labor does the body. — Seneca",
+    "If a man knows not to which port he sails, no wind is favorable. — Seneca",
+    "True happiness is to enjoy the present without anxious dependence upon the future. — Seneca",
+    "Fire tests gold, adversity tests brave men. — Seneca",
+    "While we are postponing, life speeds by. — Seneca",
+    "Begin at once to live, and count each separate day as a separate life. — Seneca",
+    "The greatest remedy for anger is delay. — Seneca",
+    "Sometimes even to live is an act of courage. — Seneca",
+    "Life is long if you know how to use it. — Seneca",
+
+    # Cicero — Wisdom and Statecraft
+    "A room without books is like a body without a soul. — Cicero",
+    "While there’s life, there’s hope. — Cicero",
+    "To be ignorant of what occurred before you were born is to remain always a child. — Cicero",
+    "Gratitude is not only the greatest of virtues, but the parent of all others. — Cicero",
+    "If you have a garden and a library, you have everything you need. — Cicero",
+    "Great is the power of habit. — Cicero",
+    "Brief is the life given us by nature, but the memory of a life well spent is eternal. — Cicero",
+    "Silence is one of the great arts of conversation. — Cicero",
+    "Friendship improves happiness and abates misery. — Cicero",
+
+    # Poets & Playwrights
+    "Fortune favors the bold. — Virgil",
+    "Love conquers all; let us, too, yield to love. — Virgil",
+    "Seize the day, trusting as little as possible in tomorrow. — Horace",
+    "Dripping water hollows out stone, not through force but through persistence. — Ovid",
+    "He who has begun has half done. Dare to be wise; begin! — Horace",
+    "The burden which is well borne becomes light. — Ovid",
+
+    # General Roman Wisdom
+    "A healthy mind in a healthy body. — Juvenal",
+    "Men willingly believe what they wish to be true. — Julius Caesar",
+    "In wine, there is truth. — Pliny the Elder",
+    "Great things are not done by impulse, but by a series of small things brought together.",
+    "Everything changes, nothing perishes. — Ovid"
+]
+
 # =========================
 # Language → Family mapping
 # =========================
@@ -315,6 +380,7 @@ tool = st.sidebar.radio(
         "Collectio (Excel File Lookup)",
         "Duplicatio (Common Files)",
         "Classificatio (Multilingual URL Domain)"
+        "Gratia (Inspire me)"
     ]
 )
 
@@ -439,6 +505,26 @@ if tool == "Classificatio (Multilingual URL Domain)":
 
         df["Sector"] = sectors
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+
+# =========================
+# Duplicatio
+# =========================
+if tool == "Gratia (Tell me something nice)":
+    st.title("Gratia")
+
+    st.write(
+        "A small pause. Nothing to optimize. Nothing to fix."
+    )
+
+    if "gratia_index" not in st.session_state:
+        st.session_state.gratia_index = 0
+
+    if st.button("Tell me something nice"):
+        quote = INSPIRING_QUOTES[st.session_state.gratia_index]
+        st.session_state.gratia_index = (
+            st.session_state.gratia_index + 1
+        ) % len(INSPIRING_QUOTES)
+        st.success(quote)
 
 # =========================
 # Footer
