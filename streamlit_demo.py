@@ -3,144 +3,118 @@ import zipfile
 import pandas as pd
 import io
 import csv
-import requests
 import re
-import tempfile
+import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+from langdetect import detect, DetectorFactory
+
+DetectorFactory.seed = 0
 
 # =========================
-# Domain keyword mapping
+# Language → Family mapping
 # =========================
-DOMAIN_KEYWORDS = {
-    "Education": [
-        "school", "schools", "university", "universities", "college", "campus",
-        "faculty", "student", "students", "teacher", "teachers", "professor",
-        "lecturer", "instructor", "education", "educational", "learning",
-        "online learning", "e learning", "distance learning",
-        "course", "courses", "curriculum", "syllabus",
-        "degree", "degrees", "bachelor", "master", "phd",
-        "certificate", "certification", "diploma",
-        "tuition", "fees", "enrollment", "admissions",
-        "classroom", "credits", "exam", "assessment",
-        "training", "academy", "seminar", "workshop",
-        "learning platform", "lms", "student portal"
-    ],
-    "Finance": [
-        "bank", "banks", "banking", "financial", "finance",
-        "loan", "loans", "lending", "credit", "debit", "mortgage",
-        "interest", "interest rate", "apr",
-        "investment", "investing", "portfolio", "assets",
-        "capital", "fund", "funding",
-        "insurance", "policy", "premium", "claim",
-        "account", "accounts", "checking", "savings",
-        "payment", "payments", "billing", "invoice",
-        "transaction", "transfer", "wire",
-        "swift", "iban",
-        "wallet", "digital wallet", "fintech",
-        "checkout", "subscription", "pricing",
-        "payroll", "salary"
-    ],
-    "Medical": [
-        "doctor", "physician", "hospital", "clinic",
-        "medical", "medicine", "health", "healthcare",
-        "patient", "patients", "patient care",
-        "appointment", "schedule",
-        "diagnosis", "diagnostic", "treatment", "therapy",
-        "prescription", "pharmacy", "medication",
-        "nurse", "nursing",
-        "laboratory", "lab results", "imaging", "radiology",
-        "surgery", "procedure",
-        "telemedicine", "virtual visit",
-        "ehr", "emr", "patient portal",
-        "coverage", "wellness", "mental health"
-    ],
-    "Retail": [
-        "store", "shop", "shopping", "retail",
-        "product", "products", "catalog", "inventory",
-        "purchase", "buy", "order",
-        "checkout", "cart", "basket",
-        "customer", "pricing", "price",
-        "discount", "promotion",
-        "sale", "offers", "deals",
-        "shipping", "delivery", "returns",
-        "refund", "exchange",
-        "online store", "ecommerce",
-        "wishlist", "tracking",
-        "brand", "subscription", "membership"
-    ],
-    "Tax": [
-        "tax", "taxes", "taxation",
-        "income tax", "corporate tax", "sales tax",
-        "vat", "value added tax",
-        "irs", "tax authority",
-        "tax return", "filing",
-        "deduction", "exemption", "credit",
-        "withholding", "payroll tax",
-        "fiscal", "audit", "compliance",
-        "liability", "refund",
-        "tax forms", "tax advisor",
-        "self assessment", "tax payment"
-    ],
-    "Travel": [
-        "travel", "trip", "tourism",
-        "flight", "airline",
-        "hotel", "accommodation",
-        "booking", "reservation",
-        "destination", "itinerary",
-        "vacation", "holiday",
-        "tour", "excursion",
-        "boarding pass", "check in",
-        "car rental", "cruise",
-        "airport", "transport",
-        "fare", "ticket",
-        "travel insurance", "travel agency"
-    ],
-    "Vehicle": [
-        "vehicle", "car", "auto", "automobile",
-        "truck", "van", "suv",
-        "motorcycle", "motorbike",
-        "engine", "transmission", "fuel",
-        "electric vehicle", "ev",
-        "vin", "registration",
-        "license plate", "inspection",
-        "insurance", "auto insurance",
-        "maintenance", "service",
-        "repair", "parts",
-        "dealer", "dealership",
-        "leasing", "warranty"
-    ],
+LANGUAGE_TO_FAMILY = {
+    # Germanic
+    "en": "germanic", "de": "germanic", "nl": "germanic",
+    "sv": "germanic", "da": "germanic", "no": "germanic", "is": "germanic",
+    # Romance
+    "es": "romance", "fr": "romance", "it": "romance",
+    "pt": "romance", "ro": "romance",
+    # Slavic
+    "ru": "slavic", "pl": "slavic", "cs": "slavic", "sk": "slavic",
+    "uk": "slavic", "bg": "slavic", "sr": "slavic", "hr": "slavic",
+    # Baltic
+    "lt": "baltic", "lv": "baltic",
+    # Celtic
+    "ga": "celtic", "gd": "celtic", "cy": "celtic", "br": "celtic",
+    # Uralic
+    "fi": "uralic", "et": "uralic", "hu": "uralic",
+}
+
+# =========================
+# Keyword sets by family
+# =========================
+KEYWORDS_BY_FAMILY = {
+    "germanic": {
+        "Education": ["school", "university", "student", "education", "course"],
+        "Finance": ["bank", "loan", "payment", "insurance", "account"],
+        "Medical": ["health", "doctor", "hospital", "patient"],
+        "Retail": ["store", "shop", "order", "purchase"],
+        "Tax": ["tax", "vat", "income", "fiscal"],
+        "Travel": ["travel", "flight", "hotel", "booking"],
+        "Vehicle": ["vehicle", "car", "registration", "license"],
+    },
+    "romance": {
+        "Education": ["escuela", "université", "università", "educación", "étudiant"],
+        "Finance": ["banco", "banque", "pagamento", "assurance"],
+        "Medical": ["salud", "médecin", "ospedale"],
+        "Retail": ["tienda", "magasin", "ordine"],
+        "Tax": ["impuesto", "taxe", "imposta", "iva"],
+        "Travel": ["viaje", "vol", "hotel", "réservation"],
+        "Vehicle": ["vehículo", "voiture", "auto"],
+    },
+    "slavic": {
+        "Education": ["школа", "университет", "учеба"],
+        "Finance": ["банк", "кредит", "платеж"],
+        "Medical": ["здоровье", "врач", "больница"],
+        "Retail": ["магазин", "покупка"],
+        "Tax": ["налог", "фискальный"],
+        "Travel": ["путешествие", "отель"],
+        "Vehicle": ["автомобиль", "регистрация"],
+    },
+    "baltic": {
+        "Education": ["mokykla", "haridus"],
+        "Finance": ["bankas", "konto"],
+        "Medical": ["sveikata", "gydytojas"],
+        "Retail": ["parduotuvė"],
+        "Tax": ["mokestis"],
+        "Travel": ["kelionė"],
+        "Vehicle": ["automobilis"],
+    },
+    "celtic": {
+        "Education": ["scoil", "oideachas"],
+        "Finance": ["banc", "íocaíocht"],
+        "Medical": ["sláinte", "dochtúir"],
+        "Retail": ["siopa"],
+        "Tax": ["cáin"],
+        "Travel": ["taisteal"],
+        "Vehicle": ["feithicil"],
+    },
+    "uralic": {
+        "Education": ["koulu", "haridus", "iskola"],
+        "Finance": ["pankki", "pank", "bank"],
+        "Medical": ["terveys", "tervis", "egészség"],
+        "Retail": ["kauppa", "pood", "bolt"],
+        "Tax": ["vero", "maks", "adó"],
+        "Travel": ["matka", "reis", "utazás"],
+        "Vehicle": ["ajoneuvo", "sõiduk", "jármű"],
+    },
 }
 
 # =========================
 # Utility functions
 # =========================
-def normalize(filename: str) -> str:
+def normalize(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-zA-ZÀ-ž0-9\s]", " ", text)
+    return re.sub(r"\s+", " ", text)
+
+def normalize_filename(filename: str) -> str:
     name = filename.lower().strip()
     if "." in name:
         name = name.rsplit(".", 1)[0]
     return name
 
-def normalize_text(text: str) -> str:
-    text = text.lower()
-    text = re.sub(r"[^a-z0-9\s]", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
+def detect_document_language(df, columns):
+    sample = " ".join(df[columns].astype(str).head(20).values.flatten())
+    return detect(sample)
 
-def detect_sector(text: str) -> str:
-    text = normalize_text(text)
-    scores = {
-        sector: sum(1 for kw in keywords if kw in text)
-        for sector, keywords in DOMAIN_KEYWORDS.items()
-    }
+def detect_sector(text: str, keywords: dict) -> str:
+    text = normalize(text)
+    scores = {s: sum(1 for kw in kws if kw in text) for s, kws in keywords.items()}
     best = max(scores, key=scores.get)
     return best if scores[best] > 0 else "Unclassified"
-
-def read_excel_safe(uploaded_file):
-    try:
-        return pd.read_excel(uploaded_file)
-    except Exception as e:
-        st.error(f"Error reading Excel file: {e}")
-        st.stop()
 
 @st.cache_data(ttl=3600)
 def fetch_domain_text(url: str) -> str:
@@ -148,24 +122,11 @@ def fetch_domain_text(url: str) -> str:
         domain = urlparse(url).netloc
         if not domain:
             return ""
-
-        headers = {"User-Agent": "Mozilla/5.0"}
-        r = requests.get(
-            f"https://{domain}",
-            headers=headers,
-            timeout=2
-        )
-
-        if r.status_code != 200:
-            return ""
-
+        r = requests.get(f"https://{domain}", timeout=2)
         soup = BeautifulSoup(r.text, "html.parser")
         for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
-
-        return normalize_text(
-            soup.get_text(separator=" ", strip=True)
-        )
+        return normalize(soup.get_text())
     except Exception:
         return ""
 
@@ -173,8 +134,6 @@ def fetch_domain_text(url: str) -> str:
 # Sidebar
 # =========================
 st.sidebar.title("Porticus")
-st.sidebar.markdown("Practical tools")
-
 tool = st.sidebar.radio(
     "Available tools",
     [
@@ -182,7 +141,7 @@ tool = st.sidebar.radio(
         "Comparatio (Folder Difference)",
         "Collectio (Excel File Lookup)",
         "Duplicatio (Common Files)",
-        "Classificatio (URL Domain)"
+        "Classificatio (Multilingual URL Domain)"
     ]
 )
 
@@ -195,85 +154,110 @@ if tool == "Home":
         "- **Comparatio** — Compare folders\n"
         "- **Collectio** — Collect files from Excel list\n"
         "- **Duplicatio** — Detect duplicate filenames\n"
-        "- **Classificatio** — Classify URLs by sector"
+        "- **Classificatio** — Multilingual URL classification"
     )
+
+# =========================
+# Comparatio
+# =========================
+if tool == "Comparatio (Folder Difference)":
+    st.title("Comparatio")
+    a = st.file_uploader("Folder A", accept_multiple_files=True)
+    b = st.file_uploader("Folder B", accept_multiple_files=True)
+
+    if st.button("Compare"):
+        if not a or not b:
+            st.error("Upload both folders.")
+        else:
+            names_a = {normalize_filename(f.name) for f in a}
+            diff = [f for f in b if normalize_filename(f.name) not in names_a]
+
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+                for f in diff:
+                    z.writestr(f.name, f.read())
+            buf.seek(0)
+
+            st.download_button("Download ZIP", buf, "new_files.zip")
+
+# =========================
+# Collectio
+# =========================
+if tool == "Collectio (Excel File Lookup)":
+    st.title("Collectio")
+    excel = st.file_uploader("Excel file", type=["xlsx"])
+    files = st.file_uploader("Files", accept_multiple_files=True)
+
+    if st.button("Collect"):
+        df = pd.read_excel(excel)
+        targets = df.iloc[:, 0].astype(str).str.lower().tolist()
+
+        index = {}
+        for f in files:
+            index.setdefault(normalize_filename(f.name), []).append(f)
+
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+            for t in targets:
+                for f in index.get(t, []):
+                    z.writestr(f.name, f.read())
+        buf.seek(0)
+
+        st.download_button("Download ZIP", buf, "collected_files.zip")
+
+# =========================
+# Duplicatio
+# =========================
+if tool == "Duplicatio (Common Files)":
+    st.title("Duplicatio")
+    a = st.file_uploader("Folder A", accept_multiple_files=True)
+    b = st.file_uploader("Folder B", accept_multiple_files=True)
+
+    if st.button("Find duplicates"):
+        dupes = sorted({f.name for f in a} & {f.name for f in b})
+        csv_buf = io.StringIO()
+        writer = csv.writer(csv_buf)
+        writer.writerow(["filename"])
+        for d in dupes:
+            writer.writerow([d])
+        st.download_button("Download CSV", csv_buf.getvalue(), "duplicates.csv")
 
 # =========================
 # Classificatio
 # =========================
-if tool == "Classificatio (URL Domain)":
-    st.title("Classificatio (URL Domain)")
-    st.write(
-        "Default behaviour uses only Excel content. "
-        "Optional webpage scanning increases accuracy but is slower."
-    )
+if tool == "Classificatio (Multilingual URL Domain)":
+    st.title("Classificatio")
 
     use_web = st.checkbox("Use webpage content (slow)", value=False)
-    BATCH_SIZE = 25
+    uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
-    uploaded_file = st.file_uploader("Excel file", type=["xlsx", "xls"])
-
-    if uploaded_file:
-        df = read_excel_safe(uploaded_file)
-
-        if df.shape[1] < 4:
-            st.error("Excel must contain at least columns A, C, and D.")
-            st.stop()
+    if uploaded:
+        df = pd.read_excel(uploaded)
 
         col_a = df.columns[0]
         col_c = df.columns[2]
         col_d = df.columns[3]
 
-        if "sector_results" not in st.session_state:
-            st.session_state.sector_results = {}
+        lang = detect_document_language(df, [col_a, col_c])
+        family = LANGUAGE_TO_FAMILY.get(lang)
 
-        total_rows = len(df)
-        progress = st.progress(0.0)
-        status = st.empty()
+        if not family:
+            st.error(f"Unsupported language detected: {lang}")
+            st.stop()
 
-        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
-            temp_path = tmp.name
+        st.info(f"Detected language: {lang.upper()} | Family: {family.capitalize()}")
 
-        for start in range(0, total_rows, BATCH_SIZE):
-            end = min(start + BATCH_SIZE, total_rows)
-            status.write(f"Processing rows {start + 1}–{end} of {total_rows}")
+        keywords = KEYWORDS_BY_FAMILY[family]
 
-            batch = df.iloc[start:end]
+        sectors = []
+        for _, row in df.iterrows():
+            text = f"{row[col_a]} {row[col_c]}"
+            if use_web:
+                text += " " + fetch_domain_text(str(row[col_d]))
+            sectors.append(detect_sector(text, keywords))
 
-            for idx, row in batch.iterrows():
-                if idx in st.session_state.sector_results:
-                    continue
-
-                local_text = str(row[col_a]) + " " + str(row[col_c])
-                url_text = fetch_domain_text(str(row[col_d])) if use_web else ""
-                combined = local_text + " " + url_text
-
-                st.session_state.sector_results[idx] = detect_sector(combined)
-
-            df["Sector"] = df.index.map(
-                lambda i: st.session_state.sector_results.get(i, "")
-            )
-            df.to_excel(temp_path, index=False)
-
-            progress.progress(end / total_rows)
-
-        df["Sector"] = df.index.map(
-            lambda i: st.session_state.sector_results.get(i, "Unclassified")
-        )
-
-        st.success("Sector classification complete.")
+        df["Sector"] = sectors
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
-
-        output = "urls_classified_by_sector.xlsx"
-        df.to_excel(output, index=False)
-
-        with open(output, "rb") as f:
-            st.download_button(
-                "Download Excel",
-                f,
-                output,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
 
 # =========================
 # Footer
