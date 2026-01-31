@@ -4,6 +4,7 @@ import pandas as pd
 import io
 import csv
 import re
+import random
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
@@ -75,7 +76,10 @@ INSPIRING_QUOTES = [
     "Great things are not done by impulse, but by a series of small things brought together.",
     "Everything changes, nothing perishes. — Ovid"
 ]
-
+if "quotes_shuffled" not in st.session_state:
+        random.shuffle (INSPIRING_QUOTES)
+        st.session_state.quotes_shuffled = True
+    
 # =========================
 # Language → Family mapping
 # =========================
