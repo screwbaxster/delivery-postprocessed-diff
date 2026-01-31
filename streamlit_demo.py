@@ -509,7 +509,7 @@ if tool == "Classificatio (Multilingual URL Domain)":
 # =========================
 # Duplicatio
 # =========================
-if tool == "Gratia (Tell me something nice)":
+if tool == "Gratia (Inspire me)":
     st.title("Gratia")
 
     st.write(
