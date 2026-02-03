@@ -504,11 +504,21 @@ if tool == "Classificatio (Multilingual URL Domain)":
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
     if uploaded:
-        df = pd.read_excel(uploaded)
+    df = pd.read_excel(uploaded)
 
-        col_a = df.columns[0]
-        col_c = df.columns[2]
-        col_d = df.columns[3]
+    if df.shape[1] < 4:
+        st.error(
+            "The uploaded Excel file must contain at least:\n"
+            "- Column A (keywords or title)\n"
+            "- Column C (context text)\n"
+            "- Column D (URL)"
+        )
+        st.stop()
+
+    col_a = df.columns[0]
+    col_c = df.columns[2]
+    col_d = df.columns[3]
+
 
         lang = detect_document_language(df, [col_a, col_c])
         family = LANGUAGE_TO_FAMILY.get(lang)
