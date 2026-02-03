@@ -77,8 +77,8 @@ INSPIRING_QUOTES = [
     "Everything changes, nothing perishes. — Ovid"
 ]
 if "quotes_shuffled" not in st.session_state:
-        random.shuffle (INSPIRING_QUOTES)
-        st.session_state.quotes_shuffled = True
+    random.shuffle (INSPIRING_QUOTES)
+    st.session_state.quotes_shuffled = True
     
 # =========================
 # Language → Family mapping
@@ -349,8 +349,11 @@ def normalize_filename(filename: str) -> str:
     return name
 
 def detect_document_language(df, columns):
-    sample = " ".join(df[columns].astype(str).head(20).values.flatten())
-    return detect(sample)
+    try:
+        sample = " ".join(df[columns].astype(str).head(20).values.flatten())
+        return detect(sample)
+    except Exception:
+        return "en"  # safe default
 
 def detect_sector(text: str, keywords: dict) -> str:
     text = normalize(text)
@@ -361,10 +364,7 @@ def detect_sector(text: str, keywords: dict) -> str:
 @st.cache_data(ttl=3600)
 def fetch_domain_text(url: str) -> str:
     try:
-        domain = urlparse(url).netloc
-        if not domain:
-            return ""
-        r = requests.get(f"https://{domain}", timeout=2)
+        r = requests.get(url, timeout=2)
         soup = BeautifulSoup(r.text, "html.parser")
         for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
