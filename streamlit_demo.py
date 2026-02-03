@@ -542,61 +542,27 @@ if tool == "Classificatio (Multilingual URL Domain)":
 # Web fetching (batched)
 # -------------------------
 if use_web:
-    urls = df[col_d].astype(str).str.strip().tolist()
-    web_texts = [""] * total_rows
-
-    total_batches = (total_rows + BATCH_SIZE - 1) // BATCH_SIZE
-    processed = 0
-
-    # Initialize progress bar explicitly
-    progress_bar.progress(0.0)
-    status_text.write("Starting web content fetching...")
-
-    for batch_num, (batch_urls, offset) in enumerate(
-        chunked(urls, BATCH_SIZE), start=1
-    ):
-        status_text.write(
-            f"Fetching batch {batch_num} of {total_batches} "
-            f"({len(batch_urls)} URLs)"
-        )
-
-        with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
-            future_map = {
-                executor.submit(safe_fetch, url): idx
-                for idx, url in enumerate(batch_urls)
-            }
-
-            for future in as_completed(future_map):
-                idx = future_map[future]
-                web_texts[offset + idx] = future.result()
-                processed += 1
-
-                # Defensive clamp to avoid >1.0
-                progress_bar.progress(min(processed / total_rows, 1.0))
-
-    # Force final repaint (critical for small / fast jobs)
+    ...
     progress_bar.progress(1.0)
     status_text.write("Web content fetching completed.")
 else:
-    # No web fetching — still give visual feedback
     web_texts = [""] * total_rows
     progress_bar.progress(1.0)
     status_text.write("Web content fetching skipped.")
 
+# -------------------------
+# Classificatio
+# -------------------------
+sectors = []
+for i, (_, row) in enumerate(df.iterrows(), start=1):
+    base_text = f"{row[col_a]} {row[col_c]}"
+    full_text = base_text + " " + web_texts[i - 1]
+    sectors.append(detect_sector(full_text, keywords))
 
-        # -------------------------
-        # Classification
-        # -------------------------
-        sectors = []
-        for i, (_, row) in enumerate(df.iterrows(), start=1):
-            base_text = f"{row[col_a]} {row[col_c]}"
-            full_text = base_text + " " + web_texts[i - 1]
-            sectors.append(detect_sector(full_text, keywords))
+df["Sector"] = sectors
+st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
 
-        df["Sector"] = sectors
-        st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
-
-        st.caption("Each row is processed independently. One URL per row.")
+st.caption("Each row is processed independently. One URL per row.")
 
 # =========================
 # Gratia
