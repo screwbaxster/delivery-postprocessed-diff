@@ -10,6 +10,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from langdetect import detect, DetectorFactory
 import time
+from concurrent.futures
+import ThreadPoolExecutor, as_completed
+
 
 
 DetectorFactory.seed = 0
@@ -19,6 +22,8 @@ DetectorFactory.seed = 0
 # =========================
 MAX_WEB_ROWS = 200
 REQUEST_DELAY_SECONDS = 0.1
+MAX_CONCURRENT_REQUESTS = 5
+
 
 INSPIRING_QUOTES = [
 
@@ -381,6 +386,14 @@ def fetch_domain_text(url: str) -> str:
     except Exception:
         return ""
 
+def safe_fetch(url: str) -> str:
+    if not url.lower().startswith(("http://", "https://")):
+        return ""
+    try:
+        return fetch_domain_text(url)
+    except Exception:
+        return ""
+
 
 # =========================
 # Sidebar
@@ -551,24 +564,26 @@ if tool == "Classificatio (Multilingual URL Domain)":
 
         sectors = []
 
-        for i, (_, row) in enumerate(df.iterrows(), start=1):
-            base_text = f"{row[col_a]} {row[col_c]}"
-            web_text = ""
+    if use_web:
+        urls = df[col_d].astype(str).str.strip().tolist()
 
-            if use_web:
-                url = str(row[col_d]).strip()
-                if url.lower().startswith(("http://", "https://")):
-                    try:
-                        web_text = fetch_domain_text(url)
-                    except Exception:
-                        web_text = ""
-                    time.sleep(REQUEST_DELAY_SECONDS)
+        web_texts = [""] * total_rows
 
-            full_text = base_text + " " + web_text
-            sectors.append(detect_sector(full_text, keywords))
+        with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+            future_map = {
+                executor.submit(safe_fetch, url): idx
+                for idx, url in enumerate(urls)
+            }
 
-            progress_bar.progress(i / total_rows)
-            status_text.write(f"Processing {i} of {total_rows}")
+            for completed, future in enumerate(as_completed(future_map), start=1):
+                idx = future_map[future]
+                web_texts[idx] = future.result()
+
+                progress_bar.progress(completed / total_rows)
+                status_text.write(f"Fetching {completed} of {total_rows}")
+    else:
+        web_texts = [""] * total_rows
+
 
         df["Sector"] = sectors
 
