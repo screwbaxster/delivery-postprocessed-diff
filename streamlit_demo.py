@@ -405,6 +405,12 @@ if tool == "Home":
 # =========================
 if tool == "Comparatio (Folder Difference)":
         st.title("Comparatio")
+
+    st.markdown(
+    "Compares two folders and identifies files that exist in Folder B but not in Folder A. "
+    "File extensions are ignored, and input files are never modified."
+)
+
     a = st.file_uploader("Folder A", accept_multiple_files=True)
     b = st.file_uploader("Folder B", accept_multiple_files=True)
 
@@ -423,15 +429,16 @@ if tool == "Comparatio (Folder Difference)":
 
             st.download_button("Download ZIP", buf, "new_files.zip")
 
-st.markdown(
-    "Compares two folders and identifies files that exist in Folder B but not in Folder A. "
-    "File extensions are ignored, and input files are never modified."
-)
 # =========================
 # Collectio
 # =========================
 if tool == "Collectio (Excel File Lookup)":
     st.title("Collectio")
+   
+    st.markdown(
+    "Uses a list of filenames from an Excel file to locate matching files in a folder. "
+    "All matches are copied into a single ZIP for download."
+)
     excel = st.file_uploader("Excel file", type=["xlsx"])
     files = st.file_uploader("Files", accept_multiple_files=True)
 
@@ -457,6 +464,12 @@ if tool == "Collectio (Excel File Lookup)":
 # =========================
 if tool == "Duplicatio (Common Files)":
     st.title("Duplicatio")
+    
+    st.markdown(
+    "Identifies filenames that appear in both uploaded folders and produces "
+    "a CSV report listing the overlaps."
+)
+    
     a = st.file_uploader("Folder A", accept_multiple_files=True)
     b = st.file_uploader("Folder B", accept_multiple_files=True)
 
@@ -474,6 +487,16 @@ if tool == "Duplicatio (Common Files)":
 # =========================
 if tool == "Classificatio (Multilingual URL Domain)":
     st.title("Classificatio")
+
+    st.markdown(
+    "Classifies URLs into predefined domains by analyzing document text and, "
+    "optionally, webpage content. Language is detected automatically and "
+    "domain-specific keywords are applied accordingly."
+)
+    st.caption(
+    "Results labeled “Out of domain scope” indicate content that does not belong "
+    "to any defined classification domain."
+)
 
     use_web = st.checkbox("Use webpage content (slow)", value=False)
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
