@@ -384,6 +384,11 @@ def safe_fetch(url: str) -> str:
 def chunked(iterable, size):
     for i in range(0, len(iterable), size):
         yield iterable[i:i + size], i
+        
+def progress_message(done, total):
+    pct = (done / total) * 100 if total else 0
+    return f"Processed {done} / {total} rows ({pct:.2f}%)"
+
 
 # =========================
 # Sidebar
@@ -557,10 +562,17 @@ if tool == "Classificatio (Multilingual URL Domain)":
                         idx = future_map[future]
                         web_texts[offset + idx] = future.result()
                         processed += 1
+                        
                         progress_bar.progress(processed / total_rows)
+                        status_text.write(
+                            f"Processed {processed} / {total_rows} rows "
+                            f"({(processed / total_rows) * 100:.2f}%)"
+                        )
 
             progress_bar.progress(1.0)
-            status_text.write("Web content fetching completed.")
+            status_text.write(
+                f"Processed {total_rows} / {total_rows} rows (100.00%)"
+            )
         else:
             web_texts = [""] * total_rows
             progress_bar.progress(1.0)
