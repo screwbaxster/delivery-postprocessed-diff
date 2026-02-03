@@ -538,13 +538,13 @@ if tool == "Classificatio (Multilingual URL Domain)":
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
 
 # =========================
-# Duplicatio
+# Gratia
 # =========================
 if tool == "Gratia (Inspire me)":
     st.title("Gratia")
 
     st.write(
-        "A small pause. Nothing to optimize. Nothing to fix."
+        "A small pause. Displays a short, thoughtful quote."
     )
 
     if "gratia_index" not in st.session_state:
