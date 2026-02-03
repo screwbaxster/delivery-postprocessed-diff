@@ -12,18 +12,15 @@ from langdetect import detect, DetectorFactory
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-
-
+# =========================
+# Global configuration
+# =========================
 DetectorFactory.seed = 0
 
-# =========================
-# Classificatio safeguards
-# =========================
-MAX_WEB_ROWS = 200
-REQUEST_DELAY_SECONDS = 0.1
-MAX_CONCURRENT_REQUESTS = 5
+MAX_CONCURRENT_REQUESTS = 5     # simultaneous URL fetches
+BATCH_SIZE = 200               # URLs per batch (transparent to user)
 
-
+# =========================
 INSPIRING_QUOTES = [
 
     "The impediment to action advances action. What stands in the way becomes the way. — Marcus Aurelius",
@@ -384,6 +381,9 @@ def safe_fetch(url: str) -> str:
     except Exception:
         return ""
 
+def chunked(iterable, size):
+    for i in range(0, len(iterable), size):
+        yield iterable[i:i + size], i
 
 # =========================
 # Sidebar
@@ -502,35 +502,21 @@ if tool == "Classificatio (Multilingual URL Domain)":
     st.title("Classificatio")
 
     st.markdown(
-        "Classifies URLs into predefined domains by analyzing document text and, "
-        "optionally, webpage content. Language is detected automatically and "
-        "domain-specific keywords are applied accordingly."
-    )
-    st.caption(
-        "Results labeled “Out of domain scope” indicate content that does not belong "
-        "to any defined classification domain."
+        "Classifies URLs into predefined domains by analyzing document text and "
+        "optionally webpage content. Large files are processed safely in batches."
     )
 
-    use_web = st.checkbox("Use webpage content (concurrent, slow)", value=False)
+    use_web = st.checkbox(
+    "Use webpage content (processed in safe concurrent batches — slow)",
+    value=False
+)
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
     if uploaded:
         df = pd.read_excel(uploaded)
 
         if df.shape[1] < 4:
-            st.error(
-                "The uploaded Excel file must contain at least:\n"
-                "- Column A (keywords or title)\n"
-                "- Column C (context text)\n"
-                "- Column D (URL)"
-            )
-            st.stop()
-
-        if use_web and len(df) > MAX_WEB_ROWS:
-            st.error(
-                f"Web content fetching is limited to {MAX_WEB_ROWS} URLs per run "
-                "to prevent instability."
-            )
+            st.error("Excel must contain at least 4 columns.")
             st.stop()
 
         col_a = df.columns[0]
@@ -547,53 +533,56 @@ if tool == "Classificatio (Multilingual URL Domain)":
         st.info(f"Detected language: {lang.upper()} | Family: {family.capitalize()}")
 
         keywords = KEYWORDS_BY_FAMILY[family]
-
         total_rows = len(df)
+
         progress_bar = st.progress(0.0)
         status_text = st.empty()
 
-        sectors = []
-
         # -------------------------
-        # Concurrent web fetching
+        # Web fetching (batched)
         # -------------------------
         if use_web:
             urls = df[col_d].astype(str).str.strip().tolist()
             web_texts = [""] * total_rows
 
-            with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
-                future_map = {
-                    executor.submit(safe_fetch, url): idx
-                    for idx, url in enumerate(urls)
-                }
+            total_batches = (total_rows + BATCH_SIZE - 1) // BATCH_SIZE
+            processed = 0
 
-                for completed, future in enumerate(as_completed(future_map), start=1):
-                    idx = future_map[future]
-                    web_texts[idx] = future.result()
+            for batch_num, (batch_urls, offset) in enumerate(
+                chunked(urls, BATCH_SIZE), start=1
+            ):
+                status_text.write(
+                    f"Fetching batch {batch_num} of {total_batches} "
+                    f"({len(batch_urls)} URLs)"
+                )
 
-                    progress_bar.progress(completed / total_rows)
-                    status_text.write(f"Fetching {completed} of {total_rows}")
+                with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+                    future_map = {
+                        executor.submit(safe_fetch, url): idx
+                        for idx, url in enumerate(batch_urls)
+                    }
+
+                    for future in as_completed(future_map):
+                        idx = future_map[future]
+                        web_texts[offset + idx] = future.result()
+                        processed += 1
+                        progress_bar.progress(processed / total_rows)
         else:
             web_texts = [""] * total_rows
 
         # -------------------------
-        # Classification (fast)
+        # Classification
         # -------------------------
+        sectors = []
         for i, (_, row) in enumerate(df.iterrows(), start=1):
             base_text = f"{row[col_a]} {row[col_c]}"
             full_text = base_text + " " + web_texts[i - 1]
             sectors.append(detect_sector(full_text, keywords))
 
         df["Sector"] = sectors
-
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
 
-        st.caption(
-            "Each row is processed independently. Column D must contain exactly one URL per row."
-        )
-
-
-
+        st.caption("Each row is processed independently. One URL per row.")
 
 # =========================
 # Gratia
