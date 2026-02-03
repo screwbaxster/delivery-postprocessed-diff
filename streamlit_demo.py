@@ -24,7 +24,7 @@ BATCH_SIZE = 200               # URLs per batch (transparent to user)
 # =========================
 INSPIRING_QUOTES = [
 
-    "The impediment to action advances action. What stands in the way becomes the way. — Marcus Aurelius",
+"The impediment to action advances action. What stands in the way becomes the way. — Marcus Aurelius",
 "Fire tests gold, adversity tests brave men. — Seneca",
 "Friendship improves happiness and abates misery. — Cicero",
 "Dripping water hollows out stone, not through force but through persistence. — Ovid",
