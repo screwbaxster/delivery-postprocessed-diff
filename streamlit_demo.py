@@ -404,11 +404,11 @@ if tool == "Home":
 # Comparatio
 # =========================
 if tool == "Comparatio (Folder Difference)":
-        st.title("Comparatio")
+    st.title("Comparatio")
 
     st.markdown(
-    "Compares two folders and identifies files that exist in Folder B but not in Folder A. "
-    "File extensions are ignored, and input files are never modified."
+        "Compares two folders and identifies files that exist in Folder B but not in Folder A. "
+        "File extensions are ignored, and input files are never modified."
 )
 
     a = st.file_uploader("Folder A", accept_multiple_files=True)
@@ -436,8 +436,8 @@ if tool == "Collectio (Excel File Lookup)":
     st.title("Collectio")
    
     st.markdown(
-    "Uses a list of filenames from an Excel file to locate matching files in a folder. "
-    "All matches are copied into a single ZIP for download."
+        "Uses a list of filenames from an Excel file to locate matching files in a folder. "
+        "All matches are copied into a single ZIP for download."
 )
     excel = st.file_uploader("Excel file", type=["xlsx"])
     files = st.file_uploader("Files", accept_multiple_files=True)
@@ -466,8 +466,8 @@ if tool == "Duplicatio (Common Files)":
     st.title("Duplicatio")
     
     st.markdown(
-    "Identifies filenames that appear in both uploaded folders and produces "
-    "a CSV report listing the overlaps."
+        "Identifies filenames that appear in both uploaded folders and produces "
+        "a CSV report listing the overlaps."
 )
     
     a = st.file_uploader("Folder A", accept_multiple_files=True)
@@ -489,9 +489,9 @@ if tool == "Classificatio (Multilingual URL Domain)":
     st.title("Classificatio")
 
     st.markdown(
-    "Classifies URLs into predefined domains by analyzing document text and, "
-    "optionally, webpage content. Language is detected automatically and "
-    "domain-specific keywords are applied accordingly."
+        "Classifies URLs into predefined domains by analyzing document text and, "
+        "optionally, webpage content. Language is detected automatically and "
+        "domain-specific keywords are applied accordingly."
 )
     st.caption(
     "Results labeled “Out of domain scope” indicate content that does not belong "
