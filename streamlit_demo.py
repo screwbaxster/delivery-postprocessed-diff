@@ -507,9 +507,9 @@ if tool == "Classificatio (Multilingual URL Domain)":
     )
 
     use_web = st.checkbox(
-    "Use webpage content (processed in safe concurrent batches — slow)",
-    value=False
-)
+        "Use webpage content (processed in safe concurrent batches — slow)",
+        value=False
+    )
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
     if uploaded:
@@ -538,31 +538,47 @@ if tool == "Classificatio (Multilingual URL Domain)":
         progress_bar = st.progress(0.0)
         status_text = st.empty()
 
-# -------------------------
-# Web fetching (batched)
-# -------------------------
-if use_web:
-    ...
-    progress_bar.progress(1.0)
-    status_text.write("Web content fetching completed.")
-else:
-    web_texts = [""] * total_rows
-    progress_bar.progress(1.0)
-    status_text.write("Web content fetching skipped.")
+        # -------------------------
+        # Web fetching (batched)
+        # -------------------------
+        if use_web:
+            urls = df[col_d].astype(str).str.strip().tolist()
+            web_texts = [""] * total_rows
+            processed = 0
 
-# -------------------------
-# Classificatio
-# -------------------------
-sectors = []
-for i, (_, row) in enumerate(df.iterrows(), start=1):
-    base_text = f"{row[col_a]} {row[col_c]}"
-    full_text = base_text + " " + web_texts[i - 1]
-    sectors.append(detect_sector(full_text, keywords))
+            for batch_urls, offset in chunked(urls, BATCH_SIZE):
+                with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+                    future_map = {
+                        executor.submit(safe_fetch, url): idx
+                        for idx, url in enumerate(batch_urls)
+                    }
 
-df["Sector"] = sectors
-st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+                    for future in as_completed(future_map):
+                        idx = future_map[future]
+                        web_texts[offset + idx] = future.result()
+                        processed += 1
+                        progress_bar.progress(processed / total_rows)
 
-st.caption("Each row is processed independently. One URL per row.")
+            progress_bar.progress(1.0)
+            status_text.write("Web content fetching completed.")
+        else:
+            web_texts = [""] * total_rows
+            progress_bar.progress(1.0)
+            status_text.write("Web content fetching skipped.")
+
+        # -------------------------
+        # Classification
+        # -------------------------
+        sectors = []
+        for i, (_, row) in enumerate(df.iterrows(), start=1):
+            base_text = f"{row[col_a]} {row[col_c]}"
+            full_text = base_text + " " + web_texts[i - 1]
+            sectors.append(detect_sector(full_text, keywords))
+
+        df["Sector"] = sectors
+        st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+
+        st.caption("Each row is processed independently. One URL per row.")
 
 # =========================
 # Gratia
