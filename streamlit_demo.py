@@ -504,7 +504,7 @@ if tool == "Classificatio (Multilingual URL Domain)":
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
     if uploaded:
-    df = pd.read_excel(uploaded)
+        df = pd.read_excel(uploaded)
 
     if df.shape[1] < 4:
         st.error(
