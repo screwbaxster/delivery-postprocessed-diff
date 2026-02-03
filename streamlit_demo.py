@@ -5,6 +5,7 @@ import io
 import csv
 import re
 import random
+import unicodedata
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
@@ -389,6 +390,15 @@ def progress_message(done, total):
     pct = (done / total) * 100 if total else 0
     return f"Processed {done} / {total} rows ({pct:.2f}%)"
 
+def remove_accents(text):
+    return "".join(
+        c for c in unicodedata.normalize("NFKD", text)
+        if not unicodedata.combining(c)
+    )
+
+def collapse_separators(text):
+    return re.sub(r"[_\-]{2,}", "_", text)
+
 
 # =========================
 # Sidebar
@@ -402,6 +412,7 @@ tool = st.sidebar.radio(
         "Collectio (Excel File Lookup)",
         "Duplicatio (Common Files)",
         "Classificatio (Multilingual URL Domain)",
+        "Nomen (Filename Normalizer)",
         "Gratia (Inspire me)"
     ]
 )
@@ -416,6 +427,7 @@ if tool == "Home":
         "- **Collectio** — Collect files from Excel list\n"
         "- **Duplicatio** — Detect duplicate filenames\n"
         "- **Classificatio** — Multilingual URL classification"
+        "- **Nomen** — Normalize filenames safely"
     )
 
 # =========================
@@ -611,6 +623,90 @@ if tool == "Gratia (Inspire me)":
             st.session_state.gratia_index + 1
         ) % len(INSPIRING_QUOTES)
         st.success(quote)
+
+# =========================
+# Nomen (Filename Normalizer)
+# =========================
+if tool == "Nomen (Filename Normalizer)":
+    st.title("Nomen")
+
+    st.markdown(
+        "Normalize filenames using selectable rules. "
+        "Original files are never modified."
+    )
+
+    files = st.file_uploader(
+        "Upload files",
+        accept_multiple_files=True
+    )
+
+    st.markdown("### Normalization rules")
+
+    opt_lower = st.checkbox("Lowercase filenames", value=True)
+    opt_spaces = st.checkbox("Replace spaces with _", value=True)
+    opt_accents = st.checkbox("Remove accents (é → e, ñ → n)", value=True)
+    opt_special = st.checkbox("Remove special characters", value=True)
+    opt_collapse = st.checkbox("Collapse repeated separators (__ → _)", value=True)
+
+    if files:
+        preview = []
+
+        for f in files:
+            name, ext = f.name.rsplit(".", 1)
+            new = name
+
+            if opt_accents:
+                new = remove_accents(new)
+
+            if opt_lower:
+                new = new.lower()
+
+            if opt_spaces:
+                new = new.replace(" ", "_")
+
+            if opt_special:
+                new = re.sub(r"[^a-zA-Z0-9_\-]", "", new)
+
+            if opt_collapse:
+                new = collapse_separators(new)
+
+            new_name = f"{new}.{ext}"
+            preview.append((f.name, new_name))
+
+        st.markdown("### Preview")
+        st.dataframe(
+            pd.DataFrame(
+                preview,
+                columns=["Original filename", "Normalized filename"]
+            )
+        )
+
+        if st.button("Download normalized ZIP"):
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+                for f in files:
+                    name, ext = f.name.rsplit(".", 1)
+                    new = name
+
+                    if opt_accents:
+                        new = remove_accents(new)
+                    if opt_lower:
+                        new = new.lower()
+                    if opt_spaces:
+                        new = new.replace(" ", "_")
+                    if opt_special:
+                        new = re.sub(r"[^a-zA-Z0-9_\-]", "", new)
+                    if opt_collapse:
+                        new = collapse_separators(new)
+
+                    z.writestr(f"{new}.{ext}", f.read())
+
+            buf.seek(0)
+            st.download_button(
+                "Download ZIP",
+                buf,
+                "normalized_files.zip"
+            )
 
 # =========================
 # Footer
