@@ -404,6 +404,10 @@ if tool == "Home":
 # Comparatio
 # =========================
 if tool == "Comparatio (Folder Difference)":
+    st.markdown(
+    "Compares two folders and identifies files that exist in Folder B but not in Folder A. "
+    "File extensions are ignored, and input files are never modified."
+)
     st.title("Comparatio")
     a = st.file_uploader("Folder A", accept_multiple_files=True)
     b = st.file_uploader("Folder B", accept_multiple_files=True)
