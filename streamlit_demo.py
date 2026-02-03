@@ -364,13 +364,15 @@ def detect_sector(text: str, keywords: dict) -> str:
 @st.cache_data(ttl=3600)
 def fetch_domain_text(url: str) -> str:
     try:
-        r = requests.get(url, timeout=2)
+        clean_url = url.split("#")[0]
+        r = requests.get(clean_url, timeout=2)
         soup = BeautifulSoup(r.text, "html.parser")
         for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
         return normalize(soup.get_text())
     except Exception:
         return ""
+
 
 # =========================
 # Sidebar
