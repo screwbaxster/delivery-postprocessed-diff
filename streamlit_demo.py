@@ -494,11 +494,11 @@ if tool == "Classificatio (Multilingual URL Domain)":
         "Classifies URLs into predefined domains by analyzing document text and, "
         "optionally, webpage content. Language is detected automatically and "
         "domain-specific keywords are applied accordingly."
-)
+    )
     st.caption(
-    "Results labeled “Out of domain scope” indicate content that does not belong "
-    "to any defined classification domain."
-)
+        "Results labeled “Out of domain scope” indicate content that does not belong "
+        "to any defined classification domain."
+    )
 
     use_web = st.checkbox("Use webpage content (slow)", value=False)
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
@@ -506,19 +506,18 @@ if tool == "Classificatio (Multilingual URL Domain)":
     if uploaded:
         df = pd.read_excel(uploaded)
 
-    if df.shape[1] < 4:
-        st.error(
-            "The uploaded Excel file must contain at least:\n"
-            "- Column A (keywords or title)\n"
-            "- Column C (context text)\n"
-            "- Column D (URL)"
-        )
-        st.stop()
+        if df.shape[1] < 4:
+            st.error(
+                "The uploaded Excel file must contain at least:\n"
+                "- Column A (keywords or title)\n"
+                "- Column C (context text)\n"
+                "- Column D (URL)"
+            )
+            st.stop()
 
-    col_a = df.columns[0]
-    col_c = df.columns[2]
-    col_d = df.columns[3]
-
+        col_a = df.columns[0]
+        col_c = df.columns[2]
+        col_d = df.columns[3]
 
         lang = detect_document_language(df, [col_a, col_c])
         family = LANGUAGE_TO_FAMILY.get(lang)
@@ -542,12 +541,13 @@ if tool == "Classificatio (Multilingual URL Domain)":
             if use_web:
                 text += " " + fetch_domain_text(str(row[col_d]))
             sectors.append(detect_sector(text, keywords))
-            
+
             progress_bar.progress(i / total_rows)
             status_text.write(f"Processing {i} of {total_rows}")
 
         df["Sector"] = sectors
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+
 
 # =========================
 # Gratia
