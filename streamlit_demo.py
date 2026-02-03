@@ -538,37 +538,51 @@ if tool == "Classificatio (Multilingual URL Domain)":
         progress_bar = st.progress(0.0)
         status_text = st.empty()
 
-        # -------------------------
-        # Web fetching (batched)
-        # -------------------------
-        if use_web:
-            urls = df[col_d].astype(str).str.strip().tolist()
-            web_texts = [""] * total_rows
+# -------------------------
+# Web fetching (batched)
+# -------------------------
+if use_web:
+    urls = df[col_d].astype(str).str.strip().tolist()
+    web_texts = [""] * total_rows
 
-            total_batches = (total_rows + BATCH_SIZE - 1) // BATCH_SIZE
-            processed = 0
+    total_batches = (total_rows + BATCH_SIZE - 1) // BATCH_SIZE
+    processed = 0
 
-            for batch_num, (batch_urls, offset) in enumerate(
-                chunked(urls, BATCH_SIZE), start=1
-            ):
-                status_text.write(
-                    f"Fetching batch {batch_num} of {total_batches} "
-                    f"({len(batch_urls)} URLs)"
-                )
+    # Initialize progress bar explicitly
+    progress_bar.progress(0.0)
+    status_text.write("Starting web content fetching...")
 
-                with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
-                    future_map = {
-                        executor.submit(safe_fetch, url): idx
-                        for idx, url in enumerate(batch_urls)
-                    }
+    for batch_num, (batch_urls, offset) in enumerate(
+        chunked(urls, BATCH_SIZE), start=1
+    ):
+        status_text.write(
+            f"Fetching batch {batch_num} of {total_batches} "
+            f"({len(batch_urls)} URLs)"
+        )
 
-                    for future in as_completed(future_map):
-                        idx = future_map[future]
-                        web_texts[offset + idx] = future.result()
-                        processed += 1
-                        progress_bar.progress(processed / total_rows)
-        else:
-            web_texts = [""] * total_rows
+        with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+            future_map = {
+                executor.submit(safe_fetch, url): idx
+                for idx, url in enumerate(batch_urls)
+            }
+
+            for future in as_completed(future_map):
+                idx = future_map[future]
+                web_texts[offset + idx] = future.result()
+                processed += 1
+
+                # Defensive clamp to avoid >1.0
+                progress_bar.progress(min(processed / total_rows, 1.0))
+
+    # Force final repaint (critical for small / fast jobs)
+    progress_bar.progress(1.0)
+    status_text.write("Web content fetching completed.")
+else:
+    # No web fetching — still give visual feedback
+    web_texts = [""] * total_rows
+    progress_bar.progress(1.0)
+    status_text.write("Web content fetching skipped.")
+
 
         # -------------------------
         # Classification
