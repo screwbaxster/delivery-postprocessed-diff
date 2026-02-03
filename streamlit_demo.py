@@ -9,8 +9,16 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from langdetect import detect, DetectorFactory
+import time
+
 
 DetectorFactory.seed = 0
+
+# =========================
+# Classificatio safeguards
+# =========================
+MAX_WEB_ROWS = 200
+REQUEST_DELAY_SECONDS = 0.1
 
 INSPIRING_QUOTES = [
 
@@ -515,6 +523,13 @@ if tool == "Classificatio (Multilingual URL Domain)":
             )
             st.stop()
 
+        if use_web and len(df) > MAX_WEB_ROWS:
+            st.error(
+                f"Web content fetching is limited to {MAX_WEB_ROWS} URLs per run "
+                "to prevent instability."
+            )
+            st.stop()
+
         col_a = df.columns[0]
         col_c = df.columns[2]
         col_d = df.columns[3]
@@ -537,16 +552,32 @@ if tool == "Classificatio (Multilingual URL Domain)":
         sectors = []
 
         for i, (_, row) in enumerate(df.iterrows(), start=1):
-            text = f"{row[col_a]} {row[col_c]}"
+            base_text = f"{row[col_a]} {row[col_c]}"
+            web_text = ""
+
             if use_web:
-                text += " " + fetch_domain_text(str(row[col_d]))
-            sectors.append(detect_sector(text, keywords))
+                url = str(row[col_d]).strip()
+                if url.lower().startswith(("http://", "https://")):
+                    try:
+                        web_text = fetch_domain_text(url)
+                    except Exception:
+                        web_text = ""
+                    time.sleep(REQUEST_DELAY_SECONDS)
+
+            full_text = base_text + " " + web_text
+            sectors.append(detect_sector(full_text, keywords))
 
             progress_bar.progress(i / total_rows)
             status_text.write(f"Processing {i} of {total_rows}")
 
         df["Sector"] = sectors
+
         st.dataframe(df[[col_a, col_c, col_d, "Sector"]])
+
+        st.caption(
+            "Each row is processed independently. Column D must contain exactly one URL per row."
+        )
+
 
 
 # =========================
