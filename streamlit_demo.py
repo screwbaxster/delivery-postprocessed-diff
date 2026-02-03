@@ -426,7 +426,7 @@ if tool == "Home":
         "- **Comparatio** — Compare folders\n"
         "- **Collectio** — Collect files from Excel list\n"
         "- **Duplicatio** — Detect duplicate filenames\n"
-        "- **Classificatio** — Multilingual URL classification"
+        "- **Classificatio** — Multilingual URL classification\n"
         "- **Nomen** — Normalize filenames safely"
     )
 
