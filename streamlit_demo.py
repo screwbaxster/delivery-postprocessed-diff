@@ -10,8 +10,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from langdetect import detect, DetectorFactory
 import time
-from concurrent.futures
-import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 
@@ -521,7 +520,7 @@ if tool == "Classificatio (Multilingual URL Domain)":
         "to any defined classification domain."
     )
 
-    use_web = st.checkbox("Use webpage content (slow)", value=False)
+    use_web = st.checkbox("Use webpage content (concurrent, slow)", value=False)
     uploaded = st.file_uploader("Upload Excel file", type=["xlsx"])
 
     if uploaded:
@@ -564,26 +563,35 @@ if tool == "Classificatio (Multilingual URL Domain)":
 
         sectors = []
 
-    if use_web:
-        urls = df[col_d].astype(str).str.strip().tolist()
+        # -------------------------
+        # Concurrent web fetching
+        # -------------------------
+        if use_web:
+            urls = df[col_d].astype(str).str.strip().tolist()
+            web_texts = [""] * total_rows
 
-        web_texts = [""] * total_rows
+            with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
+                future_map = {
+                    executor.submit(safe_fetch, url): idx
+                    for idx, url in enumerate(urls)
+                }
 
-        with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_REQUESTS) as executor:
-            future_map = {
-                executor.submit(safe_fetch, url): idx
-                for idx, url in enumerate(urls)
-            }
+                for completed, future in enumerate(as_completed(future_map), start=1):
+                    idx = future_map[future]
+                    web_texts[idx] = future.result()
 
-            for completed, future in enumerate(as_completed(future_map), start=1):
-                idx = future_map[future]
-                web_texts[idx] = future.result()
+                    progress_bar.progress(completed / total_rows)
+                    status_text.write(f"Fetching {completed} of {total_rows}")
+        else:
+            web_texts = [""] * total_rows
 
-                progress_bar.progress(completed / total_rows)
-                status_text.write(f"Fetching {completed} of {total_rows}")
-    else:
-        web_texts = [""] * total_rows
-
+        # -------------------------
+        # Classification (fast)
+        # -------------------------
+        for i, (_, row) in enumerate(df.iterrows(), start=1):
+            base_text = f"{row[col_a]} {row[col_c]}"
+            full_text = base_text + " " + web_texts[i - 1]
+            sectors.append(detect_sector(full_text, keywords))
 
         df["Sector"] = sectors
 
@@ -592,6 +600,7 @@ if tool == "Classificatio (Multilingual URL Domain)":
         st.caption(
             "Each row is processed independently. Column D must contain exactly one URL per row."
         )
+
 
 
 
